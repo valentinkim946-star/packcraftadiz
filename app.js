@@ -8,6 +8,13 @@
 const cart = [];
 let bonusPoints = 12450;
 let bonusDiscount = 0;
+let map = null;
+let mapMarker = null;
+let selectedLocation = { lat: 0, lng: 0, text: '' };
+
+// Telegram Bot credentials
+const TELEGRAM_BOT_TOKEN = '8493151607:AAE9DbdgbrqQYEGg01MWGbY6dAp_Dx6LovQ';
+const TELEGRAM_CHAT_ID = '912568809';
 
 // ─────────────────────────────────────────────
 // PAGE ROUTER
@@ -173,22 +180,26 @@ function addToCart(item) {
 document.getElementById('bp-add').addEventListener('click', () => {
   const mat   = document.querySelector('#page-backpacks .option-card.selected strong')?.textContent || 'DYNEEMA';
   const price = parseFloat(document.getElementById('bp-price')?.textContent.replace('$','')) || 495;
-  addToCart({ name: 'NOCTURNE_01 Backpack', detail: mat, price, emoji: '🎒' });
+  const img   = document.getElementById('preview-backpack')?.src || '';
+  addToCart({ name: 'NOCTURNE_01 Backpack', detail: mat, price, emoji: '🎒', image: img });
 });
 document.getElementById('wl-add').addEventListener('click', () => {
   const mat   = document.querySelector('#page-wallets .option-card.selected strong')?.textContent || 'CARBON FIBER';
   const price = parseFloat(document.getElementById('wl-price')?.textContent.replace('$','')) || 145;
-  addToCart({ name: 'CIPHER_W1 Wallet', detail: mat, price, emoji: '👜' });
+  const img   = document.getElementById('preview-wallet')?.src || '';
+  addToCart({ name: 'CIPHER_W1 Wallet', detail: mat, price, emoji: '👜', image: img });
 });
 document.getElementById('ts-add').addEventListener('click', () => {
   const size  = document.querySelector('#page-tshirts .size-btn.selected')?.textContent || 'M';
   const price = parseFloat(document.getElementById('ts-price')?.textContent.replace('$','')) || 14;
-  addToCart({ name: 'NT-01 CHASSIS Tshirt', detail: `SIZE: ${size}`, price, emoji: '👕' });
+  const img   = document.getElementById('preview-tshirt')?.src || '';
+  addToCart({ name: 'NT-01 CHASSIS Tshirt', detail: `SIZE: ${size}`, price, emoji: '👕', image: img });
 });
 document.getElementById('hd-add').addEventListener('click', () => {
   const fab   = document.querySelector('#page-hoodies .option-card.selected strong')?.textContent || 'Premium Fleece';
   const price = parseFloat(document.getElementById('hd-price')?.textContent.replace('$','')) || 24;
-  addToCart({ name: 'NOCTURNE_H1 Hoodie', detail: fab, price, emoji: '🧥' });
+  const img   = document.getElementById('preview-hoodie')?.src || '';
+  addToCart({ name: 'NOCTURNE_H1 Hoodie', detail: fab, price, emoji: '🧥', image: img });
 });
 
 // RESET DESIGN
@@ -264,7 +275,7 @@ function renderCheckout() {
 
   itemsEl.innerHTML = cart.map((item, idx) => `
     <div class="checkout-item">
-      <div class="checkout-item-thumb">${item.emoji}</div>
+      <div class="checkout-item-thumb">${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;">` : item.emoji}</div>
       <div class="checkout-item-info">
         <div class="checkout-item-name">${item.name}</div>
         <div class="checkout-item-qty">${item.detail} · QTY: 1</div>
@@ -305,6 +316,9 @@ function renderCheckout() {
   } else if (discRow) {
     discRow.remove();
   }
+
+  // Initialize map after form is rendered
+  setTimeout(() => { initializeMap(); }, 100);
 }
 
 // ─────────────────────────────────────────────
@@ -319,25 +333,164 @@ document.querySelectorAll('.pay-icon').forEach((btn, i) => {
 // ─────────────────────────────────────────────
 // PAY NOW
 // ─────────────────────────────────────────────
-document.getElementById('pay-btn').addEventListener('click', () => {
+document.getElementById('pay-btn').addEventListener('click', async () => {
   if (cart.length === 0) { showToast('Your cart is empty!'); return; }
-  const inputs = document.querySelectorAll('#page-checkout .form-input');
+  
+  const nameInput = document.getElementById('co-name');
+  const phoneInput = document.getElementById('co-phone');
+  
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  
   let ok = true;
-  inputs.forEach(inp => {
-    const empty = !inp.value.trim();
-    inp.style.borderColor = empty ? 'rgba(255,80,80,.6)' : '';
-    if (empty) ok = false;
-  });
+  if (!name) { nameInput.style.borderColor = 'rgba(255,80,80,.6)'; ok = false; } else { nameInput.style.borderColor = ''; }
+  if (!phone) { phoneInput.style.borderColor = 'rgba(255,80,80,.6)'; ok = false; } else { phoneInput.style.borderColor = ''; }
+  if (!selectedLocation.lat || !selectedLocation.lng) { 
+    showToast('Please select a location on the map.'); 
+    ok = false; 
+  }
+  
   if (!ok) { showToast('Please fill in all fields.'); return; }
 
-  const snapshot = [...cart];
-  cart.length = 0;
-  bonusDiscount = 0;
-  bonusPoints += 1250;
-  updateCartBadge();
-  renderSuccess(snapshot);
-  showPage('success');
+  // Send order to Telegram
+  showToast('Sending order...');
+  const message = formatOrderMessage(name, phone);
+  const success = await sendToTelegram(message);
+  
+  if (success) {
+    // Send images as separate messages
+    for (let item of cart) {
+      if (item.image && item.image.startsWith('data:')) {
+        await sendImageToTelegram(item.name, item.image);
+      }
+    }
+    
+    const snapshot = [...cart];
+    cart.length = 0;
+    bonusDiscount = 0;
+    bonusPoints += 1250;
+    updateCartBadge();
+    renderSuccess(snapshot);
+    showPage('success');
+    showToast('Order sent successfully! ✓');
+  } else {
+    showToast('Error sending order. Please try again.');
+  }
 });
+
+// ─────────────────────────────────────────────
+// FORMAT ORDER MESSAGE FOR TELEGRAM
+// ─────────────────────────────────────────────
+function formatOrderMessage(name, phone) {
+  const orderNum = `CYO-${Math.floor(100000 + Math.random() * 900000)}`;
+  let message = `📦 *NEW ORDER* #${orderNum}\n\n`;
+  message += `👤 *Name:* ${name}\n`;
+  message += `📱 *Phone:* ${phone}\n`;
+  message += `📍 *Location:* ${selectedLocation.text}\n`;
+  message += `🌐 *Coordinates:* ${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}\n\n`;
+  
+  message += `*Items:*\n`;
+  cart.forEach((item, idx) => {
+    message += `${idx + 1}. ${item.name} (${item.detail}) - $${item.price.toFixed(2)}\n`;
+    if (item.image) {
+      message += `   🖼️ Custom image uploaded\n`;
+    }
+  });
+  
+  const subtotal = cart.reduce((s, i) => s + i.price, 0);
+  const tax = subtotal * 0.08;
+  const total = subtotal + tax - bonusDiscount;
+  
+  message += `\n💰 *Total:* $${total.toFixed(2)}\n`;
+  message += `📊 Subtotal: $${subtotal.toFixed(2)}\n`;
+  message += `📊 Tax: $${tax.toFixed(2)}\n`;
+  
+  if (bonusDiscount > 0) {
+    message += `🎁 Bonus Discount: -$${bonusDiscount.toFixed(2)}\n`;
+  }
+  
+  return message;
+}
+
+// ─────────────────────────────────────────────
+// SEND TO TELEGRAM BOT
+// ─────────────────────────────────────────────
+async function sendToTelegram(message) {
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+      })
+    });
+    return response.ok;
+  } catch (e) {
+    console.error('Telegram error:', e);
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// SEND IMAGE TO TELEGRAM BOT
+// ─────────────────────────────────────────────
+async function sendImageToTelegram(productName, imageData) {
+  try {
+    const formData = new FormData();
+    formData.append('chat_id', TELEGRAM_CHAT_ID);
+    formData.append('caption', `Custom image for: ${productName}`);
+    
+    // Convert base64 to blob
+    const response = await fetch(imageData);
+    const blob = await response.blob();
+    formData.append('photo', blob, `${productName}.jpg`);
+    
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+      method: 'POST',
+      body: formData
+    });
+  } catch (e) {
+    console.error('Image send error:', e);
+  }
+}
+
+// ─────────────────────────────────────────────
+// INITIALIZE MAP
+// ─────────────────────────────────────────────
+function initializeMap() {
+  const mapContainer = document.getElementById('map-container');
+  if (!mapContainer || map) return;
+  
+  map = L.map('map-container').setView([40, 0], 2);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
+  }).addTo(map);
+  
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    selectedLocation.lat = lat;
+    selectedLocation.lng = lng;
+    
+    // Reverse geocoding using OpenStreetMap
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then(r => r.json())
+      .then(data => {
+        selectedLocation.text = data.address?.city || data.address?.town || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        document.getElementById('location-display').textContent = `📍 ${selectedLocation.text}`;
+      })
+      .catch(() => {
+        selectedLocation.text = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        document.getElementById('location-display').textContent = `📍 ${selectedLocation.text}`;
+      });
+    
+    if (mapMarker) map.removeLayer(mapMarker);
+    mapMarker = L.marker([lat, lng]).addTo(map);
+  });
+}
 
 // ─────────────────────────────────────────────
 // SUCCESS PAGE
@@ -357,7 +510,7 @@ function renderSuccess(snapshot) {
 
   items.innerHTML = displayCart.map(item => `
     <div class="checkout-item">
-      <div class="checkout-item-thumb">${item.emoji}</div>
+      <div class="checkout-item-thumb">${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;">` : item.emoji}</div>
       <div class="checkout-item-info">
         <div class="checkout-item-name">${item.name}</div>
         <div class="checkout-item-qty">${item.detail}</div>
