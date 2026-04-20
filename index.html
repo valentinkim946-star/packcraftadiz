@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>asda — Your Vision, Our Craft</title>
+<title>PACKCRAFT — Your Vision, Our Craft</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -36,7 +36,8 @@
 <div class="mobile-menu" id="mobile-menu">
   <div class="mobile-menu-header">
     <span class="mobile-menu-logo">PACKCRAFT</span>
-    <button class="mobile-menu-close" id="mobile-menu-close" onclick="document.getElementById('mobile-menu').classList.remove('open');document.getElementById('menu-overlay').classList.remove('open');document.querySelector('.nav-menu-btn').classList.remove('active')">✕</button>
+    <button class="mobile-menu-close" id="mobile-menu-close"
+      onclick="document.getElementById('mobile-menu').classList.remove('open');document.getElementById('menu-overlay').classList.remove('open');document.querySelector('.nav-menu-btn').classList.remove('active')">✕</button>
   </div>
   <nav class="mobile-nav">
     <a class="mobile-nav-link" data-page="home">HOME</a>
@@ -48,13 +49,15 @@
     <a class="mobile-nav-link" data-page="process">EXPLORE THE LAB</a>
   </nav>
   <div class="mobile-menu-footer">
-    <button class="btn-primary mobile-cta" data-page="backpacks" onclick="document.getElementById('mobile-menu').classList.remove('open');document.getElementById('menu-overlay').classList.remove('open');document.querySelector('.nav-menu-btn').classList.remove('active');setTimeout(()=>document.querySelector('[data-page=backpacks]').click(),300)">START CONFIGURATION</button>
+    <button class="btn-primary mobile-cta" data-page="backpacks"
+      onclick="document.getElementById('mobile-menu').classList.remove('open');document.getElementById('menu-overlay').classList.remove('open');document.querySelector('.nav-menu-btn').classList.remove('active');setTimeout(()=>showPage('backpacks'),300)">START CONFIGURATION</button>
     <p class="mobile-menu-copy">© 2024 NEON NOCTURNE SYSTEMS</p>
   </div>
 </div>
+
+<!-- ===== PAGE: HOME ===== -->
 <div class="page active" id="page-home">
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-glow"></div>
     <div class="hero-content">
@@ -67,41 +70,66 @@
     </div>
   </section>
 
-  <!-- SYSTEM MODULES -->
   <section class="modules">
     <div class="modules-header">
       <h2 class="section-title">SYSTEM MODULES</h2>
       <p class="section-sub">SELECT A BASE TO BEGIN CUSTOMIZATION</p>
     </div>
     <div class="modules-grid">
+
       <div class="module-card" data-page="backpacks">
-        <div><img src="./Container.png" alt=""></div>
+        <div class="module-img-wrap">
+          <!-- If you have Container.png locally, it shows; fallback is CSS background -->
+          <img class="module-img-photo" src="Container.png"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+            alt="Backpacks">
+          <div class="module-img module-img-backpack" style="display:none"></div>
+        </div>
         <div class="module-info">
           <span class="module-name">BACKPACKS</span>
           <button class="btn-customize" data-page="backpacks">CUSTOMIZE</button>
         </div>
       </div>
+
       <div class="module-card" data-page="wallets">
-        <div ><img src="./Container (1).png" alt=""></div>
+        <div class="module-img-wrap">
+          <img class="module-img-photo" src="Container (1).png"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+            alt="Wallets">
+          <div class="module-img module-img-wallet" style="display:none"></div>
+        </div>
         <div class="module-info">
           <span class="module-name">WALLETS</span>
           <button class="btn-customize" data-page="wallets">CUSTOMIZE</button>
         </div>
       </div>
+
       <div class="module-card" data-page="tshirts">
-        <div ><img src="./Container (2).png" alt=""></div>
+        <div class="module-img-wrap">
+          <img class="module-img-photo" src="Container (2).png"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+            alt="T-Shirts">
+          <div class="module-img module-img-tshirt" style="display:none"></div>
+        </div>
         <div class="module-info">
           <span class="module-name">TSHIRTS</span>
           <button class="btn-customize" data-page="tshirts">CUSTOMIZE</button>
         </div>
       </div>
+
       <div class="module-card" data-page="hoodies">
-        <div ><img src="./Container (3).png" alt=""></div>
+        <div class="module-img-wrap">
+          <img class="module-img-photo" src="Container (3).png"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+            alt="Hoodies">
+          <div class="module-img module-img-hoodie" style="display:none"></div>
+        </div>
         <div class="module-info">
           <span class="module-name">HOODIES</span>
           <button class="btn-customize" data-page="hoodies">CUSTOMIZE</button>
         </div>
       </div>
+
     </div>
   </section>
 
@@ -157,9 +185,7 @@
       <div class="footer-brand">
         <div class="footer-logo">NEON_NOCTURNE</div>
         <p>High-performance tactical gear for the modern urban operator. Engineered for stealth, designed for the night.</p>
-        <div class="footer-social">
-          <span>✦</span><span>📸</span><span>♪</span>
-        </div>
+        <div class="footer-social"><span>✦</span><span>📸</span><span>♪</span></div>
       </div>
       <div class="footer-col">
         <h4>PRODUCTS</h4>
@@ -186,14 +212,40 @@
     <div class="config-preview">
       <div class="product-img-wrap">
         <div class="product-img product-img-backpack" id="upload-area-backpack">
+          <!-- Product base photo -->
+          <img class="product-base-img" src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700&q=85" alt="Backpack"
+            onerror="this.style.display='none'">
+          <!-- Upload system -->
           <input type="file" accept="image/*" class="upload-file-input" id="file-backpack">
           <div class="upload-zone" id="upload-zone-backpack">
             <div class="upload-icon">📷<span>+</span></div>
             <p>UPLOAD LOGO / PHOTO</p>
             <p class="upload-hint">Click or drag &amp; drop</p>
           </div>
-          <img class="upload-preview" id="preview-backpack" src="" alt="Uploaded logo">
-          <button class="upload-remove" id="remove-backpack" title="Remove image">✕</button>
+          <img class="upload-preview" id="preview-backpack" src="" alt="Logo">
+          <button class="upload-remove" id="remove-backpack" title="Remove">✕</button>
+          <div class="img-resize-panel" id="resize-backpack">
+            <div class="resize-row">
+              <span class="resize-label">SIZE</span>
+              <input type="range" class="resize-slider" id="rs-size-backpack" min="10" max="100" value="55">
+              <span class="resize-val" id="rv-size-backpack">55%</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">← →</span>
+              <input type="range" class="resize-slider" id="rs-x-backpack" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-x-backpack">0</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">↑ ↓</span>
+              <input type="range" class="resize-slider" id="rs-y-backpack" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-y-backpack">0</span>
+            </div>
+            <div class="resize-btns">
+              <button class="resize-action-btn" id="rb-change-backpack">📁 CHANGE</button>
+              <button class="resize-action-btn" id="rb-reset-backpack">↺ RESET</button>
+              <button class="resize-action-btn danger" id="rb-del-backpack">✕ REMOVE</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="product-name-block">
@@ -201,29 +253,21 @@
         <p class="product-series">MODULAR CARRY SYSTEM // CORE SERIES</p>
       </div>
       <div class="preview-controls">
-        <button class="ctrl-btn">🔍</button>
-        <button class="ctrl-btn">↺</button>
-        <button class="ctrl-btn">⇄</button>
+        <button class="ctrl-btn" title="Zoom">🔍</button>
+        <button class="ctrl-btn" title="Rotate">↺</button>
+        <button class="ctrl-btn" title="Flip">⇄</button>
       </div>
     </div>
     <div class="config-panel">
       <h1 class="config-title">NOCTURNE_01</h1>
       <p class="config-desc">Customize your high-performance modular system. Engineered for urban survival and tactical aesthetics.</p>
-
       <div class="config-section">
         <label class="config-label">MATERIAL SYSTEM</label>
         <div class="option-cards">
-          <div class="option-card selected">
-            <strong>DYNEEMA COMPOSITE</strong>
-            <span>Ultralight: 15x stronger than steel</span>
-          </div>
-          <div class="option-card">
-            <strong>X-PAC DWR</strong>
-            <span>Multi-layer laminated shell</span>
-          </div>
+          <div class="option-card selected"><strong>DYNEEMA COMPOSITE</strong><span>Ultralight: 15x stronger than steel</span></div>
+          <div class="option-card"><strong>X-PAC DWR</strong><span>Multi-layer laminated shell</span></div>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">COLOR PROFILE</label>
         <div class="color-selector">
@@ -233,7 +277,6 @@
           <button class="color-swatch swatch-navy"></button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">CLOSURE HARDWARE</label>
         <div class="tag-selector">
@@ -242,7 +285,6 @@
           <button class="tag">YKK AQUAGUARD</button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">LASER ENGRAVING</label>
         <div class="input-wrap">
@@ -250,7 +292,6 @@
           <span class="input-icon">✎</span>
         </div>
       </div>
-
       <div class="config-footer">
         <div class="config-price-block">
           <span class="config-price-label">CURRENT CONFIGURATION</span>
@@ -268,14 +309,39 @@
     <div class="config-preview">
       <div class="product-img-wrap">
         <div class="product-img product-img-wallet" id="upload-area-wallet">
+          <img class="product-base-img product-base-img-wallet"
+            src="https://images.unsplash.com/photo-1624913503273-5f9c4e980dba?w=700&q=85" alt="Wallet"
+            onerror="this.style.display='none'">
           <input type="file" accept="image/*" class="upload-file-input" id="file-wallet">
           <div class="upload-zone" id="upload-zone-wallet">
             <div class="upload-icon">📷<span>+</span></div>
             <p>UPLOAD LOGO / PHOTO</p>
             <p class="upload-hint">Click or drag &amp; drop</p>
           </div>
-          <img class="upload-preview" id="preview-wallet" src="" alt="Uploaded logo">
-          <button class="upload-remove" id="remove-wallet" title="Remove image">✕</button>
+          <img class="upload-preview" id="preview-wallet" src="" alt="Logo">
+          <button class="upload-remove" id="remove-wallet" title="Remove">✕</button>
+          <div class="img-resize-panel" id="resize-wallet">
+            <div class="resize-row">
+              <span class="resize-label">SIZE</span>
+              <input type="range" class="resize-slider" id="rs-size-wallet" min="10" max="100" value="55">
+              <span class="resize-val" id="rv-size-wallet">55%</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">← →</span>
+              <input type="range" class="resize-slider" id="rs-x-wallet" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-x-wallet">0</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">↑ ↓</span>
+              <input type="range" class="resize-slider" id="rs-y-wallet" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-y-wallet">0</span>
+            </div>
+            <div class="resize-btns">
+              <button class="resize-action-btn" id="rb-change-wallet">📁 CHANGE</button>
+              <button class="resize-action-btn" id="rb-reset-wallet">↺ RESET</button>
+              <button class="resize-action-btn danger" id="rb-del-wallet">✕ REMOVE</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="product-name-block">
@@ -283,29 +349,21 @@
         <p class="product-series">MINIMALIST CARRY // CORE SERIES</p>
       </div>
       <div class="preview-controls">
-        <button class="ctrl-btn">🔍</button>
-        <button class="ctrl-btn">↺</button>
-        <button class="ctrl-btn">⇄</button>
+        <button class="ctrl-btn" title="Zoom">🔍</button>
+        <button class="ctrl-btn" title="Rotate">↺</button>
+        <button class="ctrl-btn" title="Flip">⇄</button>
       </div>
     </div>
     <div class="config-panel">
       <h1 class="config-title">CIPHER_W1</h1>
       <p class="config-desc">Ultra-slim tactical wallet. Carbon fiber reinforced with RFID shielding as standard.</p>
-
       <div class="config-section">
         <label class="config-label">SHELL MATERIAL</label>
         <div class="option-cards">
-          <div class="option-card selected">
-            <strong>CARBON FIBER</strong>
-            <span>3K twill weave, featherlight</span>
-          </div>
-          <div class="option-card">
-            <strong>TITANIUM FRAME</strong>
-            <span>Grade 5 aerospace alloy</span>
-          </div>
+          <div class="option-card selected"><strong>CARBON FIBER</strong><span>3K twill weave, featherlight</span></div>
+          <div class="option-card"><strong>TITANIUM FRAME</strong><span>Grade 5 aerospace alloy</span></div>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">COLOR PROFILE</label>
         <div class="color-selector">
@@ -315,7 +373,6 @@
           <button class="color-swatch swatch-navy"></button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">CAPACITY MODULES</label>
         <div class="tag-selector">
@@ -324,7 +381,6 @@
           <button class="tag">CASH SLEEVE</button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">LASER ENGRAVING</label>
         <div class="input-wrap">
@@ -332,7 +388,6 @@
           <span class="input-icon">✎</span>
         </div>
       </div>
-
       <div class="config-footer">
         <div class="config-price-block">
           <span class="config-price-label">CURRENT CONFIGURATION</span>
@@ -350,14 +405,39 @@
     <div class="config-preview">
       <div class="product-img-wrap">
         <div class="product-img product-img-tshirt" id="upload-area-tshirt">
+          <img class="product-base-img"
+            src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=700&q=85" alt="T-Shirt"
+            onerror="this.style.display='none'">
           <input type="file" accept="image/*" class="upload-file-input" id="file-tshirt">
           <div class="upload-zone upload-zone-circle" id="upload-zone-tshirt">
             <div class="upload-icon">📷</div>
             <p>UPLOAD LOGO</p>
             <p class="upload-hint">Click or drop</p>
           </div>
-          <img class="upload-preview upload-preview-circle" id="preview-tshirt" src="" alt="Uploaded logo">
-          <button class="upload-remove" id="remove-tshirt" title="Remove image">✕</button>
+          <img class="upload-preview upload-preview-circle" id="preview-tshirt" src="" alt="Logo">
+          <button class="upload-remove" id="remove-tshirt" title="Remove">✕</button>
+          <div class="img-resize-panel" id="resize-tshirt">
+            <div class="resize-row">
+              <span class="resize-label">SIZE</span>
+              <input type="range" class="resize-slider" id="rs-size-tshirt" min="10" max="100" value="55">
+              <span class="resize-val" id="rv-size-tshirt">55%</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">← →</span>
+              <input type="range" class="resize-slider" id="rs-x-tshirt" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-x-tshirt">0</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">↑ ↓</span>
+              <input type="range" class="resize-slider" id="rs-y-tshirt" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-y-tshirt">0</span>
+            </div>
+            <div class="resize-btns">
+              <button class="resize-action-btn" id="rb-change-tshirt">📁 CHANGE</button>
+              <button class="resize-action-btn" id="rb-reset-tshirt">↺ RESET</button>
+              <button class="resize-action-btn danger" id="rb-del-tshirt">✕ REMOVE</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="product-name-block">
@@ -375,7 +455,6 @@
           <button class="size-btn">XL</button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">COLOR SPECTRUM</label>
         <div class="color-selector">
@@ -386,7 +465,6 @@
           <button class="color-swatch swatch-red"></button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">DIGITAL EMBOSSING</label>
         <p class="config-sub-label">INPUT TEXT</p>
@@ -395,7 +473,6 @@
         </div>
         <p class="config-hint"><span class="hint-icon">ℹ</span> Max 12 characters. Applied via high-density kinetic ink.</p>
       </div>
-
       <div class="config-footer">
         <div class="config-price-block-row">
           <div>
@@ -419,16 +496,41 @@
     <div class="config-preview">
       <div class="product-img-wrap">
         <div class="product-img product-img-hoodie" id="upload-area-hoodie">
+          <img class="product-base-img"
+            src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=700&q=85" alt="Hoodie"
+            onerror="this.style.display='none'">
           <input type="file" accept="image/*" class="upload-file-input" id="file-hoodie">
           <div class="upload-zone upload-zone-rect" id="upload-zone-hoodie">
             <div class="upload-icon">📷<span>+</span></div>
             <p>UPLOAD LOGO / PHOTO</p>
             <p class="upload-hint">Click or drag &amp; drop</p>
           </div>
-          <img class="upload-preview" id="preview-hoodie" src="" alt="Uploaded logo">
-          <button class="upload-remove" id="remove-hoodie" title="Remove image">✕</button>
+          <img class="upload-preview" id="preview-hoodie" src="" alt="Logo">
+          <button class="upload-remove" id="remove-hoodie" title="Remove">✕</button>
           <div class="hoodie-dot hoodie-dot-left"></div>
           <div class="hoodie-dot hoodie-dot-right"></div>
+          <div class="img-resize-panel" id="resize-hoodie">
+            <div class="resize-row">
+              <span class="resize-label">SIZE</span>
+              <input type="range" class="resize-slider" id="rs-size-hoodie" min="10" max="100" value="55">
+              <span class="resize-val" id="rv-size-hoodie">55%</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">← →</span>
+              <input type="range" class="resize-slider" id="rs-x-hoodie" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-x-hoodie">0</span>
+            </div>
+            <div class="resize-row">
+              <span class="resize-label">↑ ↓</span>
+              <input type="range" class="resize-slider" id="rs-y-hoodie" min="-40" max="40" value="0">
+              <span class="resize-val" id="rv-y-hoodie">0</span>
+            </div>
+            <div class="resize-btns">
+              <button class="resize-action-btn" id="rb-change-hoodie">📁 CHANGE</button>
+              <button class="resize-action-btn" id="rb-reset-hoodie">↺ RESET</button>
+              <button class="resize-action-btn danger" id="rb-del-hoodie">✕ REMOVE</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="product-name-block">
@@ -447,21 +549,13 @@
           <div class="ship-time">48 HOURS</div>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">FABRIC TECHNOLOGY</label>
         <div class="option-cards">
-          <div class="option-card selected">
-            <strong>Premium Fleece</strong>
-            <span>450GSM Ultra-Soft Interior</span>
-          </div>
-          <div class="option-card">
-            <strong>Organic Cotton</strong>
-            <span>Breathable Sustainable Weave</span>
-          </div>
+          <div class="option-card selected"><strong>Premium Fleece</strong><span>450GSM Ultra-Soft Interior</span></div>
+          <div class="option-card"><strong>Organic Cotton</strong><span>Breathable Sustainable Weave</span></div>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">COLOR PROFILE</label>
         <div class="color-selector">
@@ -471,7 +565,6 @@
           <button class="color-swatch swatch-green"></button>
         </div>
       </div>
-
       <div class="config-section">
         <label class="config-label">PERSONALIZATION</label>
         <div class="input-wrap">
@@ -480,7 +573,6 @@
         </div>
         <p class="config-hint">Maximum 8 characters. Technical laser engraving on chest panel.</p>
       </div>
-
       <div class="config-section">
         <label class="config-label">SIZE GUIDE</label>
         <div class="size-selector">
@@ -490,7 +582,6 @@
           <button class="size-btn">XL</button>
         </div>
       </div>
-
       <div class="config-footer">
         <div class="config-price-block-row">
           <button class="btn-reset">RESET DESIGN</button>
@@ -508,12 +599,9 @@
 <!-- ===== PAGE: CHECKOUT ===== -->
 <div class="page" id="page-checkout">
   <div class="checkout-layout">
-    <!-- LEFT: order summary -->
     <div class="checkout-summary">
       <h3 class="checkout-section-title">ORDER SUMMARY</h3>
-      <div class="checkout-items" id="checkout-items">
-        <!-- filled by JS -->
-      </div>
+      <div class="checkout-items" id="checkout-items"></div>
       <div class="checkout-subtotals">
         <div class="subtotal-row"><span>Subtotal</span><span id="co-subtotal">$0.00</span></div>
         <div class="subtotal-row"><span>Shipping</span><span class="accent">FREE</span></div>
@@ -529,14 +617,15 @@
       </div>
     </div>
 
-    <!-- CENTER: product visual placeholder -->
     <div class="checkout-visual">
-      <div class="checkout-product-visual"></div>
+      <div class="checkout-product-visual">
+        <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80" class="co-img co-img-1" alt="">
+        <img src="https://images.unsplash.com/photo-1624913503273-5f9c4e980dba?w=300&q=80" class="co-img co-img-2" alt="">
+      </div>
       <h2 class="checkout-brand">PACKCRAFT</h2>
       <p class="checkout-brand-sub">PRECISION CARRY &amp; APPAREL SYSTEMS</p>
     </div>
 
-    <!-- RIGHT: shipping + payment -->
     <div class="checkout-form">
       <h3 class="checkout-section-title">DELIVERY INFORMATION</h3>
       <div class="form-group">
@@ -549,9 +638,9 @@
       </div>
       <div class="form-group">
         <label class="form-label">DELIVERY LOCATION</label>
-        <p class="form-hint">Click on the map to select your location</p>
+        <p class="form-hint">Click on the map to select your delivery location</p>
         <div id="map-container" class="map-container"></div>
-        <p class="location-display" id="location-display">Location: Not selected</p>
+        <p class="location-display" id="location-display">📍 Location: Not selected</p>
         <input type="hidden" id="co-latitude" value="">
         <input type="hidden" id="co-longitude" value="">
         <input type="hidden" id="co-location-text" value="">
@@ -638,9 +727,7 @@
         <p class="config-hint">2,550 NP TO REACH COMMANDER RANK</p>
       </div>
     </div>
-
     <h2 class="bonus-section-title">Active Benefits &amp; Exchange</h2>
-
     <div class="bonus-grid">
       <div class="bonus-exchange-col">
         <div class="exchange-card">
@@ -672,7 +759,6 @@
         <button class="btn-primary">Sync Progress →</button>
       </div>
     </div>
-
     <div class="extended-card">
       <div class="extended-icon">✦</div>
       <div class="extended-info">
@@ -685,9 +771,7 @@
         <div class="text-right">60%</div>
       </div>
     </div>
-
     <h2 class="bonus-section-title">Neural Activity Logs</h2>
-
     <div class="activity-table">
       <div class="table-header">
         <span>DATE</span><span>ACTIVITY</span><span>TYPE</span><span class="text-right">POINTS</span>
@@ -711,7 +795,6 @@
         <span class="text-right accent">+ 850</span>
       </div>
     </div>
-
     <footer class="bonus-footer">
       <span class="accent" style="font-weight:700;font-size:.8rem;letter-spacing:.1em">NEURAL FOREST GEAR</span>
       <div class="footer-legal-links">
