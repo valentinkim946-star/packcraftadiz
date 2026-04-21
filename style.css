@@ -2007,3 +2007,52 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--muted-2); border-radius: 2px; }
+
+/* ============ MAP CONTAINER ============ */
+.map-container {
+  width: 100%;
+  height: 300px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-3);
+  margin: 1rem 0;
+  z-index: 10;
+}
+
+.map-container .leaflet-container {
+  background: var(--bg-3);
+}
+
+.map-container .leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+}
+
+.map-container .leaflet-control-zoom-in,
+.map-container .leaflet-control-zoom-out {
+  background: var(--bg) !important;
+  color: var(--green) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: bold;
+}
+
+.map-container .leaflet-control-zoom-in:hover,
+.map-container .leaflet-control-zoom-out:hover {
+  background: var(--bg-2) !important;
+}
+
+.form-hint {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin: 0;
+}
+
+.location-display {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  color: var(--green);
+  letter-spacing: .06em;
+  padding: .6rem 0;
+  margin: 0;
+}
