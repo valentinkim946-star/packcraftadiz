@@ -32,6 +32,7 @@ function showPage(name) {
     l.classList.toggle('active', l.dataset.page === name);
   });
   window.scrollTo(0, 0);
+  if (name === 'checkout') initMap();
 }
 
 // ─────────────────────────────────────────────
@@ -317,18 +318,77 @@ document.querySelectorAll('.pay-icon').forEach((btn, i) => {
 });
 
 // ─────────────────────────────────────────────
-// PAY NOW
+// MAP (Leaflet) — Checkout delivery location
+// ─────────────────────────────────────────────
+let map = null;
+let mapMarker = null;
+
+function initMap() {
+  if (map) return; // already initialized
+  setTimeout(() => {
+    const container = document.getElementById('map-container');
+    if (!container || !window.L) return;
+
+    map = L.map('map-container').setView([41.2995, 69.2401], 11); // Tashkent default
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Custom green marker
+    const greenIcon = L.divIcon({
+      html: `<div style="width:16px;height:16px;background:var(--green,#2dff6e);border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px rgba(45,255,110,.6)"></div>`,
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+      className: ''
+    });
+
+    map.on('click', (e) => {
+      const { lat, lng } = e.latlng;
+      if (mapMarker) map.removeLayer(mapMarker);
+      mapMarker = L.marker([lat, lng], { icon: greenIcon }).addTo(map);
+
+      document.getElementById('co-latitude').value  = lat.toFixed(6);
+      document.getElementById('co-longitude').value = lng.toFixed(6);
+
+      const locText = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+      document.getElementById('co-location-text').value = locText;
+      document.getElementById('location-display').textContent = `📍 ${locText}`;
+      document.getElementById('location-display').style.color = 'var(--green)';
+    });
+
+    // Force map to render correctly after show
+    map.invalidateSize();
+  }, 200);
+}
+
+// ─────────────────────────────────────────────
+// PAY NOW  (map-based checkout)
 // ─────────────────────────────────────────────
 document.getElementById('pay-btn').addEventListener('click', () => {
   if (cart.length === 0) { showToast('Your cart is empty!'); return; }
-  const inputs = document.querySelectorAll('#page-checkout .form-input');
+
+  const nameEl  = document.getElementById('co-name');
+  const phoneEl = document.getElementById('co-phone');
+  const latEl   = document.getElementById('co-latitude');
+
   let ok = true;
-  inputs.forEach(inp => {
+
+  [nameEl, phoneEl].forEach(inp => {
+    if (!inp) return;
     const empty = !inp.value.trim();
     inp.style.borderColor = empty ? 'rgba(255,80,80,.6)' : '';
     if (empty) ok = false;
   });
-  if (!ok) { showToast('Please fill in all fields.'); return; }
+
+  if (!latEl || !latEl.value) {
+    const disp = document.getElementById('location-display');
+    if (disp) { disp.style.color = 'rgba(255,80,80,.8)'; disp.textContent = '📍 Please select a delivery location on the map'; }
+    ok = false;
+  }
+
+  if (!ok) { showToast('Please fill in all fields and select a location.'); return; }
 
   const snapshot = [...cart];
   cart.length = 0;
@@ -408,36 +468,124 @@ document.querySelectorAll('.tactical-card .btn-primary').forEach(btn => {
 });
 
 // ─────────────────────────────────────────────
-// IMAGE UPLOAD
+// IMAGE UPLOAD + RESIZE SYSTEM
 // ─────────────────────────────────────────────
-[
-  { area: 'upload-area-backpack', file: 'file-backpack', preview: 'preview-backpack', remove: 'remove-backpack' },
-  { area: 'upload-area-wallet',   file: 'file-wallet',   preview: 'preview-wallet',   remove: 'remove-wallet'   },
-  { area: 'upload-area-tshirt',   file: 'file-tshirt',   preview: 'preview-tshirt',   remove: 'remove-tshirt'   },
-  { area: 'upload-area-hoodie',   file: 'file-hoodie',   preview: 'preview-hoodie',   remove: 'remove-hoodie'   },
-].forEach(({ area, file, preview, remove }) => {
-  const areaEl = document.getElementById(area), fileEl = document.getElementById(file),
-        prevEl = document.getElementById(preview), rmEl  = document.getElementById(remove);
-  if (!areaEl || !fileEl || !prevEl || !rmEl) return;
+const uploadProducts = ['backpack', 'wallet', 'tshirt', 'hoodie'];
 
-  fileEl.addEventListener('change', () => { if (fileEl.files[0]) loadImage(fileEl.files[0], areaEl, prevEl); });
+// State per product
+const imgState = {};
+uploadProducts.forEach(p => {
+  imgState[p] = { size: 55, x: 0, y: 0 };
+});
+
+function applyImgTransform(product) {
+  const preview = document.getElementById(`preview-${product}`);
+  if (!preview) return;
+  const { size, x, y } = imgState[product];
+  // width as % of container, position via translate
+  preview.style.width  = `${size}%`;
+  preview.style.height = 'auto';
+  preview.style.top    = `calc(50% + ${y}%)`;
+  preview.style.left   = `calc(50% + ${x}%)`;
+  preview.style.transform = 'translate(-50%, -50%)';
+  // update val labels
+  const sv = document.getElementById(`rv-size-${product}`);
+  const xv = document.getElementById(`rv-x-${product}`);
+  const yv = document.getElementById(`rv-y-${product}`);
+  if (sv) sv.textContent = `${size}%`;
+  if (xv) xv.textContent = x > 0 ? `+${x}` : `${x}`;
+  if (yv) yv.textContent = y > 0 ? `+${y}` : `${y}`;
+}
+
+uploadProducts.forEach(product => {
+  const areaEl   = document.getElementById(`upload-area-${product}`);
+  const fileEl   = document.getElementById(`file-${product}`);
+  const previewEl = document.getElementById(`preview-${product}`);
+  const removeEl  = document.getElementById(`remove-${product}`);
+  if (!areaEl || !fileEl || !previewEl || !removeEl) return;
+
+  // ── File change ──
+  fileEl.addEventListener('change', () => {
+    if (fileEl.files[0]) loadImage(fileEl.files[0], areaEl, previewEl, product);
+  });
+
+  // ── Drag & drop ──
   areaEl.addEventListener('dragover',  e => { e.preventDefault(); areaEl.classList.add('drag-over'); });
   areaEl.addEventListener('dragleave', () => areaEl.classList.remove('drag-over'));
   areaEl.addEventListener('drop', e => {
     e.preventDefault(); areaEl.classList.remove('drag-over');
     const f = e.dataTransfer.files[0];
-    if (f?.type.startsWith('image/')) loadImage(f, areaEl, prevEl);
+    if (f?.type.startsWith('image/')) loadImage(f, areaEl, previewEl, product);
   });
-  rmEl.addEventListener('click', e => {
+
+  // ── Old remove button (top-right ✕) ──
+  removeEl.addEventListener('click', e => {
     e.stopPropagation(); e.preventDefault();
-    areaEl.classList.remove('has-image'); prevEl.src = ''; fileEl.value = '';
+    clearImage(areaEl, previewEl, fileEl, product);
+  });
+
+  // ── Resize sliders ──
+  ['size','x','y'].forEach(axis => {
+    const slider = document.getElementById(`rs-${axis}-${product}`);
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+      imgState[product][axis] = parseInt(slider.value);
+      applyImgTransform(product);
+    });
+  });
+
+  // ── Panel action buttons ──
+  const changeBtn = document.getElementById(`rb-change-${product}`);
+  const resetBtn  = document.getElementById(`rb-reset-${product}`);
+  const delBtn    = document.getElementById(`rb-del-${product}`);
+
+  if (changeBtn) changeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    fileEl.click();
+  });
+
+  if (resetBtn) resetBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    imgState[product] = { size: 55, x: 0, y: 0 };
+    ['size','x','y'].forEach(axis => {
+      const sl = document.getElementById(`rs-${axis}-${product}`);
+      if (sl) sl.value = imgState[product][axis];
+    });
+    applyImgTransform(product);
+  });
+
+  if (delBtn) delBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    clearImage(areaEl, previewEl, fileEl, product);
   });
 });
 
-function loadImage(file, area, preview) {
-  const r = new FileReader();
-  r.onload = e => { preview.src = e.target.result; area.classList.add('has-image'); };
-  r.readAsDataURL(file);
+function loadImage(file, area, preview, product) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src = e.target.result;
+    area.classList.add('has-image');
+    // Reset sliders to default
+    imgState[product] = { size: 55, x: 0, y: 0 };
+    ['size','x','y'].forEach(axis => {
+      const sl = document.getElementById(`rs-${axis}-${product}`);
+      if (sl) sl.value = imgState[product][axis];
+    });
+    applyImgTransform(product);
+    preview.animate(
+      [{ opacity: 0, transform: 'translate(-50%,-50%) scale(.85)' },
+       { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }],
+      { duration: 280, fill: 'forwards' }
+    );
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearImage(area, preview, fileEl, product) {
+  area.classList.remove('has-image');
+  preview.src = '';
+  fileEl.value = '';
+  imgState[product] = { size: 55, x: 0, y: 0 };
 }
 
 // ─────────────────────────────────────────────
